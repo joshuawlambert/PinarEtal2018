@@ -1,0 +1,776 @@
+libname NH "F:\Data";
+                                           /*******Data A:1999-2000**********/
+data teetha;
+set nh.OHXDENT;
+array teeth(32) OHX01TC OHX02TC OHX03TC OHX04TC OHX05TC OHX06TC OHX07TC OHX08TC OHX09TC OHX10TC OHX11TC OHX12TC 
+OHX13TC OHX14TC OHX15TC OHX16TC OHX17TC OHX18TC OHX19TC OHX20TC OHX21TC OHX22TC OHX23TC OHX24TC OHX25TC OHX26TC 
+OHX27TC OHX28TC OHX29TC OHX30TC OHX31TC OHX32TC; 
+array newteeth(32) teeth1-teeth32;
+do i=1 to 32;
+if teeth(i) in (1,2) then newteeth(i)=1;
+else if teeth(i)>2 then newteeth(i)=0;
+end;
+totalteeth=sum(teeth1,teeth2,teeth3,teeth4,teeth5,teeth6,teeth7,teeth8,teeth9,teeth10,teeth11,teeth12,teeth13,
+teeth14,teeth15,teeth16,teeth17,teeth18,teeth19,teeth20,teeth21,teeth22,teeth23,teeth24,teeth25,teeth26,teeth27,
+teeth28,teeth29,teeth30,teeth31,teeth32);
+*keep seqn totalteeth;
+run;
+data perioa; *Periodontal data;
+merge nh.demo nh.OHXPERIO teetha;
+by seqn;
+run;
+data perioa; 
+set perioa;
+*where RIDAGEYR ge 18 and totalteeth ge 16;
+array pd(56) OHD02PCM OHD03PCM OHD04PCM OHD05PCM OHD06PCM OHD07PCM OHD08PCM OHD09PCM OHD10PCM OHD11PCM 
+OHD12PCM OHD13PCM OHD14PCM OHD15PCM 
+OHD18PCM OHD19PCM OHD20PCM OHD21PCM OHD22PCM OHD23PCM OHD24PCM OHD25PCM OHD26PCM OHD27PCM 
+OHD28PCM OHD29PCM OHD30PCM OHD31PCM 
+OHD02PCS OHD03PCS OHD04PCS OHD05PCS OHD06PCS OHD07PCS OHD08PCS OHD09PCS OHD10PCS OHD11PCS 
+OHD12PCS OHD13PCS OHD14PCS OHD15PCS 
+OHD18PCS OHD19PCS OHD20PCS OHD21PCS OHD22PCS OHD23PCS OHD24PCS OHD25PCS OHD26PCS OHD27PCS 
+OHD28PCS OHD29PCS OHD30PCS OHD31PCS; *two sites per tooth and 28;
+array al(56) OHD02lam OHD03lam OHD04lam OHD05lam OHD06lam OHD07lam OHD08lam OHD09lam OHD10lam OHD11lam 
+OHD12lam OHD13lam OHD14lam OHD15lam 
+OHD18lam OHD19lam OHD20lam OHD21lam OHD22lam OHD23lam OHD24lam	OHD25lam OHD26lam OHD27lam	
+OHD28lam OHD29lam OHD30lam OHD31lam
+OHD02las OHD03las OHD04las OHD05las OHD06las OHD07las OHD08las OHD09las OHD10las OHD11las 
+OHD12las OHD13las OHD14las OHD15las 
+OHD18las OHD19las OHD20las OHD21las OHD22las OHD23las OHD24las	OHD25las OHD26las OHD27las	
+OHD28las OHD29las OHD30las OHD31las;
+array newperio(56) perio1-perio56;
+do i=1 to 56;
+if (pd(i) ge 4 and pd(i)<99) and (al(i) ge 3 and al(i)<99)  then newperio(i)=1;
+else newperio(i)=0;
+end;
+totalperio=sum(perio1,perio2,perio3,perio4,perio5,perio6,perio7,perio8,perio9,perio10,perio11,perio12,perio13,perio14,
+perio15,perio16,perio17,perio18,perio19,perio20,perio21,perio22,perio23,perio24,perio25,perio26,perio27,perio28,
+perio29,perio30,perio31,perio32,perio33,perio34,perio35,perio36,perio37,perio38,perio39,perio40,perio41,perio42,perio43,
+perio44,perio45,perio46,perio47,perio48,perio49,perio50,perio51,perio52,perio53,perio54,perio55,perio56);
+keep seqn totalperio totalteeth;
+run;
+data perioa;
+set perioa;
+if totalperio ge 1 then periostat=1;
+else periostat=0;
+run;
+data dataa;
+merge nh.DEMO nh.LAB10AM nh.LAB28POC nh.LAB26PP nh.LAB21 nh.LAB06HM nh.LAB06 nh.LAB07 nh.PHPYPA nh.lab09 nh.OCQ
+nh.L02HPA_a nh.L02HBS nh.BMX nh.LAB22 nh.LAB17 nh.LAB19 nh.LAB04 nh.LAB05 nh.LAB02 perioa nh.OHXREF nh.smq nh.diq;
+by SEQN;
+LBXBHC=LBDBHC;
+URXDCB=URX24D;
+if RIDAGEYR ge 18 and totalteeth ge 16 then do;
+	new4yr=WTMEC4YR; new2yr=WTMEC2YR;
+	newhm4yr=WTSHM4YR; newhm2yr=WTSHM2YR;
+	newph4yr=WTSPH4YR; newph2yr=WTSPH2YR;
+	newpo4yr=WTSPO4YR; newpo2yr=WTSPO2YR;
+	newpp4yr=WTSPP4YR; newpp2yr=WTSPP2YR;
+	newvoc4yr=WTSVOC4Y; newvoc2yr=WTSVOC2Y;
+end;
+else do;
+	new4yr=1e-6; new2yr=1e-6;
+	new4yr=1e-6; new2yr=1e-6;
+	newhm4yr=1e-6; newhm2yr=1e-6;
+	newph4yr=1e-6; newph2yr=1e-6;
+	newpo4yr=1e-6; newpo2yr=1e-6;
+	newpp4yr=1e-6; newpp2yr=1e-6;
+	newvoc4yr=1e-6; newvoc2yr=1e-6;
+end;
+if newhm2yr='' then newhm2yr=1e-7;
+if newph2yr='' then newph2yr=1e-7;
+if newpo2yr='' then newpo2yr=1e-7;
+if newpp2yr='' then newpp2yr=1e-7;
+if newvoc2yr='' then newvoc2yr=1e-7;
+
+if newhm4yr='' then newhm4yr=1e-7;
+if newph4yr='' then newph4yr=1e-7;
+if newpo4yr='' then newpo4yr=1e-7;
+if newpp4yr='' then newpp4yr=1e-7;
+if newvoc4yr='' then newvoc4yr=1e-7;
+if OHAREC ne . and OHAROCGP=. then precom=0;
+else if OHAROCGP=1 then precom=1;
+if diq010=1 then diabetes=1;
+else if diq010=2 or diq010=3 then diabetes=0;
+if LBXCOT>=10 then smokecli=1;
+else if LBXCOT<10 and LBXCOT ne . then smokecli=0;
+if LBXGLU>=126 then diabcli=1;
+else if LBXGLU<126 and LBXGLU ne . then diabcli=0;
+run;
+                            /***************** Data B: 2001-2002 ********************/
+data teethb;
+set nh.ohxden_b;
+array teeth(32) OHD01TC OHD02TC OHD03TC OHD04TC OHD05TC OHD06TC OHD07TC OHD08TC OHD09TC OHD10TC OHD11TC OHD12TC 
+OHD13TC OHD14TC OHD15TC OHD16TC OHD17TC OHD18TC OHD19TC OHD20TC OHD21TC OHD22TC OHD23TC OHD24TC OHD25TC OHD26TC 
+OHD27TC OHD28TC OHD29TC OHD30TC OHD31TC OHD32TC ; 
+array newteeth(32) teeth1-teeth32;
+do i=1 to 32;
+if teeth(i) in (1,2) then newteeth(i)=1;
+else if teeth(i)>2 then newteeth(i)=0;
+end;
+totalteeth=sum(teeth1,teeth2,teeth3,teeth4,teeth5,teeth6,teeth7,teeth8,teeth9,teeth10,teet11,teeth12,teeth13,
+teeth14,teeth15,teeth16,teeth17,teeth18,teeth19,teeth20,teeth21,teeth22,teeth23,teeth24,teeth25,teeth26,teeth27,
+teeth28,teeth29,teeth30,teeth31,teeth32);
+keep seqn totalteeth;
+run;
+data periob; *Periodontal data;
+merge nh.demo_b nh.OHXPRL_b nh.OHXPRU_b teethb;
+by seqn;
+run;
+****** Count # pd>=4mm and al>=3mm ************;
+data periob; 
+set periob;
+*where RIDAGEYR ge 18 and totalteeth ge 16;
+array pd(56) OHD02PCM OHD03PCM OHD04PCM OHD05PCM OHD06PCM OHD07PCM OHD08PCM OHD09PCM OHD10PCM OHD11PCM 
+OHD12PCM OHD13PCM OHD14PCM OHD15PCM 
+OHD18PCM OHD19PCM OHD20PCM OHD21PCM OHD22PCM OHD23PCM OHD24PCM OHD25PCM OHD26PCM OHD27PCM 
+OHD28PCM OHD29PCM OHD30PCM OHD31PCM 
+OHD02PCS OHD03PCS OHD04PCS OHD05PCS OHD06PCS OHD07PCS OHD08PCS OHD09PCS OHD10PCS OHD11PCS 
+OHD12PCS OHD13PCS OHD14PCS OHD15PCS 
+OHD18PCS OHD19PCS OHD20PCS OHD21PCS OHD22PCS OHD23PCS OHD24PCS OHD25PCS OHD26PCS OHD27PCS 
+OHD28PCS OHD29PCS OHD30PCS OHD31PCS;
+array al(56) ohd02lam ohd03lam ohd04lam ohd05lam ohd06lam ohd07lam ohd08lam ohd09lam ohd10lam ohd11lam 
+ohd12lam ohd13lam ohd14lam ohd15lam 
+ohd18lam ohd19lam ohd20lam ohd21lam ohd22lam ohd23lam ohd24lam	ohd25lam ohd26lam ohd27lam	
+ohd28lam ohd29lam ohd30lam ohd31lam
+ohd02las ohd03las ohd04las ohd05las ohd06las ohd07las ohd08las ohd09las ohd10las ohd11las 
+ohd12las ohd13las ohd14las ohd15las 
+ohd18las ohd19las ohd20las ohd21las ohd22las ohd23las ohd24las	ohd25las ohd26las ohd27las	
+ohd28las ohd29las ohd30las ohd31las;
+array newperio(56) perio1-perio56;
+do i=1 to 56;
+if (pd(i) ge 4 and pd(i)<99) and (al(i) ge 3 and al(i)<99) then newperio(i)=1;
+else newperio(i)=0;
+end;
+totalperio=sum(perio1,perio2,perio3,perio4,perio5,perio6,perio7,perio8,perio9,perio10,perio11,perio12,perio13,perio14,
+perio15,perio16,perio17,perio18,perio19,perio20,perio21,perio22,perio23,perio24,perio25,perio26,perio27,perio28,
+perio29,perio30,perio31,perio32,perio33,perio34,perio35,perio36,perio37,perio38,perio39,perio40,perio41,perio42,perio43,
+perio44,perio45,perio46,perio47,perio48,perio49,perio50,perio51,perio52,perio53,perio54,perio55,perio56);
+keep seqn totalperio totalteeth;
+run;
+data periob;
+set periob;
+if totalperio ge 1 then periostat=1;
+else periostat=0;
+run;
+data datab;
+merge nh.DEMO_B nh.BMX_B nh.l34_b nh.l26PP_B nh.L28POC_B nh.L06HM_B nh.L06_B nh.L06VID_B nh.L06VIT_B nh.PHPYPA_B 
+nh.l09_b nh.L02HPA_B nh.L02HBS_B nh.L04VOC_B nh.L10AM_B nh.L06UIO_B nh.L19_B nh.L40_B nh.L05_b nh.L17_b nh.L36_B
+nh.L40FE_B nh.L35_B nh.L06UIO_B nh.L04VOC_B nh.L02_B periob nh.OHXREF_B nh.smq_b nh.diq_b nh.OCQ_B;
+by SEQN;
+LBXVTC=LBXV4C;
+LBDHBG=LBXHBS;
+LBXTO1=LBDTO1;
+URXDCB=URX24D;
+if RIDAGEYR ge 18 and totalteeth ge 16 then do;
+	new4yr=WTMEC4YR; new2yr=WTMEC2YR;
+	newhm4yr=WTSHM4YR; newhm2yr=WTSHM2YR;
+	newph4yr=WTSPH4YR; newph2yr=WTSPH2YR;
+	newpo4yr=WTSPO4YR; newpo2yr=WTSPO2YR;
+	newpp4yr=WTSPP4YR; newpp2yr=WTSPP2YR;
+	newvoc4yr=WTSVOC4Y; newvoc2yr=WTSVOC2Y;
+end;
+else do;
+	new4yr=1e-6; new2yr=1e-6;
+	newhm4yr=1e-6; newhm2yr=1e-6;
+	newph4yr=1e-6; newph2yr=1e-6;
+	newpo4yr=1e-6; newpo2yr=1e-6;
+	newpp4yr=1e-6; newpp2yr=1e-6;
+	newvoc4yr=1e-6; newvoc2yr=1e-6;
+end;
+if newhm2yr='' then newhm2yr=1e-7;
+if newph2yr='' then newph2yr=1e-7;
+if newpo2yr='' then newpo2yr=1e-7;
+if newpp2yr='' then newpp2yr=1e-7;
+if newvoc2yr='' then newvoc2yr=1e-7;
+
+if newhm4yr='' then newhm4yr=1e-7;
+if newph4yr='' then newph4yr=1e-7;
+if newpo4yr='' then newpo4yr=1e-7;
+if newpp4yr='' then newpp4yr=1e-7;
+if newvoc4yr='' then newvoc4yr=1e-7;
+if OHAREC ne . and OHAROCGP=. then precom=0;
+else if OHAROCGP=1 then precom=1;
+if diq010=1 then diabetes=1;
+else if diq010=2 or diq010=3 then diabetes=0;
+if LBXCOT>=10 then smokecli=1;
+else if LBXCOT<10 and LBXCOT ne . then smokecli=0;
+if LBXGLU>=126 then diabcli=1;
+else if LBXGLU<126 and LBXGLU ne . then diabcli=0;
+run;
+                            /***************** Data C:2003-2004 ********************/
+data teethc;
+set nh.ohxden_c;
+array teeth(32) OHX01TC OHX02TC OHX03TC OHX04TC OHX05TC OHX06TC OHX07TC OHX08TC OHX09TC OHX10TC OHX11TC OHX12TC 
+OHX13TC OHX14TC OHX15TC OHX16TC OHX17TC OHX18TC OHX19TC OHX20TC OHX21TC OHX22TC OHX23TC OHX24TC OHX25TC OHX26TC 
+OHX27TC OHX28TC OHX29TC OHX30TC OHX31TC OHX32TC; 
+array newteeth(32) teeth1-teeth32;
+do i=1 to 32;
+if teeth(i) in (1,2) then newteeth(i)=1;
+else if teeth(i)>2 then newteeth(i)=0;
+end;
+totalteeth=sum(teeth1,teeth2,teeth3,teeth4,teeth5,teeth6,teeth7,teeth8,teeth9,teeth10,teet11,teeth12,teeth13,
+teeth14,teeth15,teeth16,teeth17,teeth18,teeth19,teeth20,teeth21,teeth22,teeth23,teeth24,teeth25,teeth26,teeth27,
+teeth28,teeth29,teeth30,teeth31,teeth32);
+keep seqn totalteeth;
+run;
+data perioc; *Periodontal data;
+merge nh.demo_c nh.OHXPRL_c nh.OHXPRU_c teethc;
+by seqn;
+run;
+****** Count # pd>=4mm and al>=3mm ************;
+data perioc; 
+set perioc;
+*where RIDAGEYR ge 18 and totalteeth ge 16;
+array pd(56) OHD02PCM OHD03PCM OHD04PCM OHD05PCM OHD06PCM OHD07PCM OHD08PCM OHD09PCM OHD10PCM OHD11PCM 
+OHD12PCM OHD13PCM OHD14PCM OHD15PCM 
+OHD18PCM OHD19PCM OHD20PCM OHD21PCM OHD22PCM OHD23PCM OHD24PCM OHD25PCM OHD26PCM OHD27PCM 
+OHD28PCM OHD29PCM OHD30PCM OHD31PCM 
+OHD02PCS OHD03PCS OHD04PCS OHD05PCS OHD06PCS OHD07PCS OHD08PCS OHD09PCS OHD10PCS OHD11PCS 
+OHD12PCS OHD13PCS OHD14PCS OHD15PCS 
+OHD18PCS OHD19PCS OHD20PCS OHD21PCS OHD22PCS OHD23PCS OHD24PCS OHD25PCS OHD26PCS OHD27PCS 
+OHD28PCS OHD29PCS OHD30PCS OHD31PCS;
+
+array al(56) OHD02lam OHD03lam OHD04lam OHD05lam OHD06lam OHD07lam OHD08lam OHD09lam OHD10lam OHD11lam 
+OHD12lam OHD13lam OHD14lam OHD15lam 
+OHD18lam OHD19lam OHD20lam OHD21lam OHD22lam OHD23lam OHD24lam	OHD25lam OHD26lam OHD27lam	
+OHD28lam OHD29lam OHD30lam OHD31lam
+OHD02las OHD03las OHD04las OHD05las OHD06las OHD07las OHD08las OHD09las OHD10las OHD11las 
+OHD12las OHD13las OHD14las OHD15las 
+OHD18las OHD19las OHD20las OHD21las OHD22las OHD23las OHD24las	OHD25las OHD26las OHD27las	
+OHD28las OHD29las OHD30las OHD31las;
+
+array newperio(56) perio1-perio56;
+do i=1 to 56;
+if (pd(i) ge 4 and pd(i)<99) and (al(i) ge 3 and al(i)<99)  then newperio(i)=1;
+else newperio(i)=0;
+end;
+totalperio=sum(perio1,perio2,perio3,perio4,perio5,perio6,perio7,perio8,perio9,perio10,perio11,perio12,perio13,perio14,
+perio15,perio16,perio17,perio18,perio19,perio20,perio21,perio22,perio23,perio24,perio25,perio26,perio27,perio28,
+perio29,perio30,perio31,perio32,perio33,perio34,perio35,perio36,perio37,perio38,perio39,perio40,perio41,perio42,perio43,
+perio44,perio45,perio46,perio47,perio48,perio49,perio50,perio51,perio52,perio53,perio54,perio55,perio56);
+keep seqn totalperio totalteeth;
+run;
+data perioc;
+set perioc;
+if totalperio ge 1 then periostat=1;
+else periostat=0;
+run;
+data datac;
+merge nh.demo_c nh.BMX_C nh.L06AGE_C nh.l34_c nh.L06COT_C nh.L26OPD_C nh.L28DFP_C nh.L06HM_C nh.L06BMT_C nh.L40FE_C 
+nh.L06UAS_C nh.L06UHG_C nh.L06TFR_C nh.L31PAH_C nh.L45VIT_C nh.L43_C nh.L06VID_C nh.L06VIT_C nh.L28OCP_C nh.L28NPB_C 
+nh.L04PER_C nh.L26UPP_C nh.L24PP_C nh.L24EPH_C nh.L24PH_C nh.L28PBE_C nh.L24PFC_C nh.L02HPA_C nh.L02HBS_C nh.l09_c 
+nh.L04VOC_C nh.L10AM_C nh.L19_C nh.L52SER_C nh.L06UIO_C nh.L39EPP_C nh.L06NB_C nh.L06MH_C nh.L06PHY_C nh.L35_C nh.L02_C 
+nh.L05_C nh.L36_C nh.L17_C perioc nh.OHXREF_C nh.smq_c nh.diq_c nh.OCQ_C;
+by SEQN;
+URXPAR=URXPCP;
+LBXVID=LBDVID;
+LBXVIE=LBXATC;
+URDUCD=URXUCD;
+if RIDAGEYR ge 18 and totalteeth ge 16 then do;
+	new2yr=WTMEC2YR;
+	newa2yr=WTSA2YR;
+	newb2yr=WTSB2YR;
+	newc2yr=WTSC2YR;
+	newvoc2yr=WTSVOC2Y;
+end;
+else do;
+ 	new2yr=1e-6;
+	newa2yr=1e-6;
+	newb2yr=1e-6;
+	newc2yr=1e-6;
+	newvoc2yr=1e-6;
+end;
+if newa2yr='' then newa2yr=1e-7;
+if newb2yr='' then newb2yr=1e-7;
+if newc2yr='' then newc2yr=1e-7;
+if newvoc2yr='' then newvoc2yr=1e-7;
+if OHAREC ne . and OHAROCGP=. then precom=0;
+else if OHAROCGP=1 then precom=1;
+if diq010=1 then diabetes=1;
+else if diq010=2 or diq010=3 then diabetes=0;
+if LBXCOT>=10 then smokecli=1;
+else if LBXCOT<10 and LBXCOT ne . then smokecli=0;
+if LBXGLU>=126 then diabcli=1;
+else if LBXGLU<126 and LBXGLU ne . then diabcli=0;
+run;
+
+                            /***************** Combine DATA A,B, and C********************/
+***** Combine A and B ******;
+data AB;
+set datab; 
+run;
+proc append base=ab data=dataa force;
+run;
+
+****** Combine A, B, and C *****;
+data combine;
+set datac;
+new4yr=.;
+newhm4yr=.;
+newph4yr=.;
+newpo4yr=.;
+newpp4yr=.;
+newvoc4yr=.;
+
+newhm2yr=.;
+newph2yr=.;
+newpo2yr=.;
+newpp2yr=.;
+*newvoc2yr=.; *there is newvoc2yr in datac;
+URXTCC=.;
+URXMET=.;
+URXDPY=.;
+LBXTO3=.;
+URXP09=.;
+URXDEE=.;
+URXCPM=.;
+URXPAR=.;
+run;
+proc append base=combine data=dataa force;
+run;
+proc append base=combine data=datab force;
+run;
+
+/***6 years of data from 1999-2004***/
+data combine;
+set combine;
+if sddsrvyr=1 or  sddsrvyr=2 then new6yr  = 2/3*  new4yr ; /* for 1999-2002 */
+if sddsrvyr=1 or  sddsrvyr=2 then newa6yr  = 2/3*  newhm4yr ;
+if sddsrvyr=1 or  sddsrvyr=2 then newb6yr  = 2/3*  newph4yr ;
+if sddsrvyr=1 or  sddsrvyr=2 then newc6yr = 2/3*  newpo4yr ; *PO has most weight compared to PP;
+*if sddsrvyr=1 or  sddsrvyr=2 then newc6yr = 2/3*  newpp4yr ; *2yrPO=2yrPP;
+if sddsrvyr=1 or  sddsrvyr=2 then newvoc6yr  = 2/3*  newvoc4yr ;
+If sddsrvyr=3  then new6yr = 1/3 * new2yr  ; /* for 2003-2004 */
+If sddsrvyr=3  then newa6yr = 1/3 * newa2yr  ;
+If sddsrvyr=3  then newb6yr = 1/3 * newb2yr  ;
+If sddsrvyr=3  then newc6yr = 1/3 * newc2yr  ;
+If sddsrvyr=3  then newvoc6yr = 1/3 * newvoc2yr  ;
+
+if sddsrvyr=2 or sddsrvyr=3 then newbc4yr=1/2 * WTMEC2YR;
+
+if newa6yr='' then newa6yr=1e-7;
+if newb6yr='' then newb6yr=1e-7;
+if newc6yr='' then newc6yr=1e-7;
+if newvoc6yr='' then newvoc6yr=1e-7;
+if newbc4yr='' then newbc4yr=1e-7;
+
+if OCQ290G=1 then occsmoke=1;
+else if OCQ290G=2 then occsmoke=0;
+
+if SMQ020=0 then smoking=0;						*nonsmokers;
+if SMQ020=1 and SMQ040 in (1,2) then smoking=1; *current smokers;
+if SMQ020=1 and SMQ040=3 then smoking=2;       *former smokers;
+run;
+
+data combine;
+set combine;
+zlogURX24D=log(URX24D);
+zlogLBXACR=log(LBXACR);
+zlogLBXGLY=log(LBXGLY);
+zlogLBXALC=log(LBXALC);
+zlogLBXBEC=log(LBXBEC);
+zlogLBXCBC=log(LBXCBC);
+zlogLBXCRY=log(LBXCRY);
+zlogLBXLUZ=log(LBXLUZ);
+zlogLBXLYC=log(LBXLYC);
+zlogLBXIRN=log(LBXIRN);
+zlogLBXSEL=log(LBXSEL);
+zlogLBXRPL=log(LBXRPL);
+zlogLBXRST=log(LBXRST);
+zlogLBXVIA=log(LBXVIA);
+zlogLBXB12=log(LBXB12);
+zlogLBXFOL=log(LBXFOL);
+zlogLBXMMA=log(LBXMMA);
+zlogLBXRBF=log(LBXRBF);
+zlogLBDVID=log(LBDVID);
+zlogLBXGTC=log(LBXGTC);
+zlogLBXVIE=log(LBXVIE);
+zlogURXDAZ=log(URXDAZ);
+zlogURXDMA=log(URXDMA);
+zlogURXEQU=log(URXEQU);
+zlogURXETD=log(URXETD);
+zlogURXETL=log(URXETL);
+zlogURXGNS=log(URXGNS);
+zlogLBXCOT=log(LBXCOT);
+zlogURXP01=log(URXP01);
+zlogURXP02=log(URXP02);
+zlogURXP03=log(URXP03);
+zlogURXP04=log(URXP04);
+zlogURXP05=log(URXP05);
+zlogURXP06=log(URXP06);
+zlogURXP07=log(URXP07);
+zlogURXP10=log(URXP10);
+
+zlogURXP17=log(URXP17);
+zlogURXP19=log(URXP19);
+
+zlogLBXV4C=log(LBXV4C);
+zlogLBXVBF=log(LBXVBF);
+zlogLBXVBM=log(LBXVBM);
+zlogLBXVBZ=log(LBXVBZ);
+zlogLBXVCF=log(LBXVCF);
+zlogLBXVCM=log(LBXVCM);
+zlogLBXVCT=log(LBXVCT);
+zlogLBXVDB=log(LBXVDB);
+zlogLBXVEB=log(LBXVEB);
+zlogLBXVME=log(LBXVME);
+zlogLBXVOX=log(LBXVOX);
+zlogLBXVST=log(LBXVST);
+zlogLBXVTC=log(LBXVTC);
+zlogLBXV3A=log(LBXV3A);
+zlogLBXVTO=log(LBXVTO);
+zlogLBXVXY=log(LBXVXY);
+zlogLBXWBF=log(LBXWBF);
+zlogLBXWCF=log(LBXWCF);
+zlogLBXWBM=log(LBXWBM);
+zlogLBXWCM=log(LBXWCM);
+zlogLBXWME=log(LBXWME);
+
+
+
+
+
+zlogLBDRUIU=log(LBDRUIU);
+
+zlogLBXME=log(LBXME);
+
+
+
+
+zlogLBXTO1=log(LBXTO1);
+
+
+
+zlogLBXVAR=log(LBXVAR);
+
+zlogURX4TO=log(URX4TO);
+zlogURXBP3=log(URXBP3);
+zlogURXBPH=log(URXBPH);
+zlogURXMBP=log(URXMBP);
+zlogURXMC1=log(URXMC1);
+zlogURXMCP=log(URXMCP);
+zlogURXMEP=log(URXMEP);
+zlogURXMHH=log(URXMHH);
+zlogURXMHP=log(URXMHP);
+zlogURXMIB=log(URXMIB);
+zlogURXMNP=log(URXMNP);
+zlogURXMNM=log(URXMNM);
+zlogURXMOH=log(URXMOH);
+zlogURXMOP=log(URXMOP);
+zlogURXMZP=log(URXMZP);
+zlogLBXMPAH=log(LBXMPAH);
+zlogLBXPFDE=log(LBXPFDE);
+
+zlogLBXPFHS=log(LBXPFHS);
+zlogLBXPFNA=log(LBXPFNA);
+zlogLBXPFOA=log(LBXPFOA);
+zlogLBXPFOS=log(LBXPFOS);
+zlogLBXPFSA=log(LBXPFSA);
+
+zlogLBXBCD=log(LBXBCD);
+zlogLBXBPB=log(LBXBPB);
+zlogLBXIHG=log(LBXIHG);
+zlogLBXTHG=log(LBXTHG);
+
+
+
+
+zlogURXUBA=log(URXUBA);
+zlogURDUCD=log(URDUCD);
+zlogURXUCO=log(URXUCO);
+zlogURXUCS=log(URXUCS);
+zlogURXUDMA=log(URXUDMA);
+zlogURXUHG=log(URXUHG);
+zlogURXUIO=log(URXUIO);
+zlogURXUMMA=log(URXUMMA);
+zlogURXUMO=log(URXUMO);
+zlogURXUPB=log(URXUPB);
+zlogURXUSB=log(URXUSB);
+zlogURXUTL=log(URXUTL);
+zlogURXUTU=log(URXUTU);
+zlogURXUUR=log(URXUUR);
+zlogLBD199=log(LBD199);
+zlogLBX028=log(LBX028);
+zlogLBX052=log(LBX052);
+zlogLBX066=log(LBX066);
+zlogLBX074=log(LBX074);
+zlogLBX099=log(LBX099);
+zlogLBX101=log(LBX101);
+zlogLBX105=log(LBX105);
+zlogLBX118=log(LBX118);
+zlogLBX138=log(LBX138);
+zlogLBX146=log(LBX146);
+zlogLBX153=log(LBX153);
+zlogLBX156=log(LBX156);
+zlogLBX157=log(LBX157);
+zlogLBX167=log(LBX167);
+zlogLBX170=log(LBX170);
+zlogLBX172=log(LBX172);
+zlogLBX177=log(LBX177);
+zlogLBX178=log(LBX178);
+zlogLBX180=log(LBX180);
+zlogLBX183=log(LBX183);
+zlogLBX187=log(LBX187);
+zlogLBX194=log(LBX194);
+zlogLBX196=log(LBX196);
+zlogLBX206=log(LBX206);
+zlogLBXHXC=log(LBXHXC);
+zlogLBXPCB=log(LBXPCB);
+zlogLBXD01=log(LBXD01);
+zlogLBXD02=log(LBXD02);
+zlogLBXD03=log(LBXD03);
+zlogLBXD04=log(LBXD04);
+zlogLBXD05=log(LBXD05);
+zlogLBXD07=log(LBXD07);
+zlogLBXTCD=log(LBXTCD);
+zlogURXMET=log(URXMET);
+zlogLBXBHC=log(LBXBHC);
+zlogLBXDIE=log(LBXDIE);
+zlogLBXHCB=log(LBXHCB);
+zlogLBXHPE=log(LBXHPE);
+zlogLBXMIR=log(LBXMIR);
+zlogLBXODT=log(LBXODT);
+zlogLBXOXY=log(LBXOXY);
+zlogLBXPDE=log(LBXPDE);
+zlogLBXPDT=log(LBXPDT);
+zlogLBXTNA=log(LBXTNA);
+zlogURXDPY=log(URXDPY);
+zlogURX14D=log(URX14D);
+zlogURX1TB=log(URX1TB);
+zlogURX3TB=log(URX3TB);
+zlogURXDCB=log(URXDCB);
+zlogURXOPP=log(URXOPP);
+zlogURXPCP=log(URXPCP);
+zlogURXDEE=log(URXDEE);
+zlogURXCPM=log(URXCPM);
+zlogURXPAR=log(URXPAR);
+zlogURXTCC=log(URXTCC);
+zlogURXOP1=log(URXOP1);
+zlogURXOP2=log(URXOP2);
+zlogURXOP3=log(URXOP3);
+zlogURXOP4=log(URXOP4);
+zlogURXOP5=log(URXOP5);
+zlogURXOP6=log(URXOP6);
+zlogLBXD01=log(LBXD01);
+zlogLBXF03=log(LBXF03);
+zlogLBXF04=log(LBXF04);
+zlogLBXF05=log(LBXF05);
+zlogLBXF07=log(LBXF07);
+zlogLBXF08=log(LBXF08);
+zlogLBXTO2=log(LBXTO2);	
+zlogLBXTO3=log(LBXTO3);	
+zlogLBXVID=log(LBXVID);
+run;
+
+PROC STANDARD DATA=combine MEAN=0 STD=1 OUT=nh.zlogabc;
+  VAR 
+zlogLBXVID
+zlogURX24D
+zlogLBXTO2
+zlogLBXTO3
+zlogLBXACR
+zlogLBXGLY
+zlogLBXALC
+zlogLBXBEC
+zlogLBXCBC
+zlogLBXCRY
+zlogLBXLUZ
+zlogLBXLYC
+zlogLBXIRN
+zlogLBXSEL
+zlogLBXRPL
+zlogLBXRST
+zlogLBXVIA
+zlogLBXB12
+zlogLBXFOL
+zlogLBXMMA
+zlogLBXRBF
+zlogLBDVID
+zlogLBXGTC
+zlogLBXVIE
+zlogURXDAZ
+zlogURXDMA
+zlogURXEQU
+zlogURXETD
+zlogURXETL
+zlogURXGNS
+zlogLBXCOT
+zlogURXP01
+zlogURXP02
+zlogURXP03
+zlogURXP04
+zlogURXP05
+zlogURXP06
+zlogURXP07
+
+
+zlogURXP10
+
+
+
+
+
+
+zlogURXP17
+zlogURXP19
+
+
+
+
+zlogLBXV4C
+zlogLBXVBF
+zlogLBXVBM
+zlogLBXVBZ
+zlogLBXVCF
+zlogLBXVCM
+zlogLBXVCT
+zlogLBXVDB
+zlogLBXVEB
+zlogLBXVME
+zlogLBXVOX
+zlogLBXVST
+zlogLBXVTC
+zlogLBXV3A
+zlogLBXVTO
+zlogLBXVXY
+zlogLBXWBF
+zlogLBXWCF
+zlogLBXWBM
+zlogLBXWCM
+zlogLBXWME
+
+
+
+
+
+zlogLBDRUIU
+
+zlogLBXME
+
+
+
+
+zlogLBXTO1
+
+
+zlogLBXVAR
+
+
+zlogURX4TO
+zlogURXBP3
+zlogURXBPH
+zlogURXMBP
+zlogURXMC1
+zlogURXMCP
+zlogURXMEP
+zlogURXMHH
+zlogURXMHP
+zlogURXMIB
+zlogURXMNP
+zlogURXMNM
+zlogURXMOH
+zlogURXMOP
+zlogURXMZP
+zlogLBXMPAH
+zlogLBXPFDE
+
+zlogLBXPFHS
+zlogLBXPFNA
+zlogLBXPFOA
+zlogLBXPFOS
+zlogLBXPFSA
+
+zlogLBXBCD
+zlogLBXBPB
+zlogLBXIHG
+zlogLBXTHG
+
+
+
+
+
+zlogURXUBA
+zlogURDUCD
+zlogURXUCO
+zlogURXUCS
+zlogURXUDMA
+zlogURXUHG
+zlogURXUIO
+zlogURXUMMA
+zlogURXUMO
+zlogURXUPB
+zlogURXUSB
+zlogURXUTL
+zlogURXUTU
+zlogURXUUR
+zlogLBD199
+zlogLBX028
+zlogLBX052
+zlogLBX066
+zlogLBX074
+zlogLBX099
+zlogLBX101
+zlogLBX105
+zlogLBX118
+zlogLBX138
+zlogLBX146
+zlogLBX153
+zlogLBX156
+zlogLBX157
+zlogLBX167
+zlogLBX170
+zlogLBX172
+zlogLBX177
+zlogLBX178
+zlogLBX180
+zlogLBX183
+zlogLBX187
+zlogLBX194
+zlogLBX196
+zlogLBX206
+zlogLBXHXC
+zlogLBXPCB
+zlogLBXD01
+zlogLBXD02
+zlogLBXD03
+zlogLBXD04
+zlogLBXD05
+zlogLBXD07
+zlogLBXTCD
+zlogURXMET
+zlogLBXBHC
+zlogLBXDIE
+zlogLBXHCB
+zlogLBXHPE
+zlogLBXMIR
+zlogLBXODT
+zlogLBXOXY
+zlogLBXPDE
+zlogLBXPDT
+zlogLBXTNA
+zlogURXDPY
+zlogURX14D
+zlogURX1TB
+zlogURX3TB
+zlogURXDCB
+zlogURXOPP
+zlogURXPCP
+zlogURXDEE
+zlogURXCPM
+zlogURXPAR
+zlogURXTCC
+zlogURXOP1
+zlogURXOP2
+zlogURXOP3
+zlogURXOP4
+zlogURXOP5
+zlogURXOP6
+zlogLBXD01
+zlogLBXF03
+zlogLBXF04
+zlogLBXF05
+zlogLBXF07
+zlogLBXF08
+;
+run;
