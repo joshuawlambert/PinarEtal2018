@@ -1,0 +1,99 @@
+install.packages("survey")
+library(survey)
+all<-read.csv("data")
+coln<-colnames(all)[grep("zlog",x=colnames(all))]
+
+
+
+all$periostat <- factor(all$periostat ,labels=c("Healthy","Perio"))
+all$RIDRETH1<-factor(all$RIDRETH1,labels=c("Mex Am","O Hisp","White","Black","Other"))
+all$RIAGENDR<-factor(all$RIAGENDR,labels=c("Male","Female"))
+all$smoking<-factor(all$smoking,labels=c("Non-Smoker","Current Smoker","Former Smoker"))
+
+#non smokers:
+subsmk<-subset(all,all$smoking=='Non-Smoker' & all$RIDAGEYR>18 &  all$totalteeth>=16)
+
+statout<-array(NA,dim=c(length(coln),4))
+dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
+survlogistic <- function(x)
+{
+  form <- as.formula(paste("periostat~",x,"+RIDAGEYR + as.factor(RIAGENDR)+ as.factor(RIDRETH1)+INDFMPIR"))
+  stat<-summary(svyglm(form,dsn,family=quasibinomial()))$coefficients[2,1:4]   
+  return(stat)
+}
+
+for(i in c(1:length(coln))){
+  if(sum(!is.na(eval(parse(text=paste("all$",coln[i],sep="")))))!=0){
+    if(i != c(172)){
+      statout[i,1:4]<-survlogistic(coln[i])[1:4]
+      show(i)
+    }
+    
+  }
+}
+options(scipen=999)
+colnames(statout)<-names(survlogistic("zlogLBXACR"))
+statout<-data.frame(statout); statout$Name<-coln
+statout$ci95<-paste(round(exp(statout$Estimate),2),"(",round(exp(statout$Estimate-1.96*statout$Std..Error),2),",",round(exp(statout$Estimate+1.96*statout$Std..Error),2),")")
+statout$Pr...t..<-round(statout$Pr...t..,digits = 4)
+statout$SmkStatus<-"Non-Smoker"
+statoutFinal2<-statout
+
+
+#Current Smoker
+subsmk<-subset(all,all$smoking=='Current Smoker' & all$RIDAGEYR>18 &  all$totalteeth>=16)
+
+statout<-array(NA,dim=c(length(coln),4))
+dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
+survlogistic <- function(x)
+{
+  form <- as.formula(paste("periostat~",x,"+RIDAGEYR + as.factor(RIAGENDR)+ as.factor(RIDRETH1)+INDFMPIR"))
+  stat<-summary(svyglm(form,dsn,family=quasibinomial()))$coefficients[2,1:4]   
+  return(stat)
+}
+
+for(i in c(1:length(coln))){
+  if(sum(!is.na(eval(parse(text=paste("all$",coln[i],sep="")))))!=0){
+    if(i != c(172)){
+      statout[i,1:4]<-survlogistic(coln[i])[1:4]
+      show(i)
+    }
+    
+  }
+}
+options(scipen=999)
+colnames(statout)<-names(survlogistic("zlogLBXACR"))
+statout<-data.frame(statout); statout$Name<-coln
+statout$ci95<-paste(round(exp(statout$Estimate),2),"(",round(exp(statout$Estimate-1.96*statout$Std..Error),2),",",round(exp(statout$Estimate+1.96*statout$Std..Error),2),")")
+statout$Pr...t..<-round(statout$Pr...t..,digits = 4)
+statout$SmkStatus<-"Current-Smoker"
+statoutFinal2<-rbind(statoutFinal2,statout)
+
+#'Former Smoker' 
+subsmk<-subset(all,all$smoking=='Former Smoker' &  all$RIDAGEYR>18 &  all$totalteeth>=16)
+
+statout<-array(NA,dim=c(length(coln),4))
+dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
+survlogistic <- function(x)
+{
+  form <- as.formula(paste("periostat~",x,"+RIDAGEYR + as.factor(RIAGENDR)+ as.factor(RIDRETH1)+INDFMPIR"))
+  stat<-summary(svyglm(form,dsn,family=quasibinomial()))$coefficients[2,1:4]   
+  return(stat)
+}
+
+for(i in c(1:length(coln))){
+  if(sum(!is.na(eval(parse(text=paste("all$",coln[i],sep="")))))!=0){
+    if(i != c(172)){
+      statout[i,1:4]<-survlogistic(coln[i])[1:4]
+      show(i)
+    }
+    
+  }
+}
+options(scipen=999)
+colnames(statout)<-names(survlogistic("zlogLBXACR"))
+statout<-data.frame(statout); statout$Name<-coln
+statout$ci95<-paste(round(exp(statout$Estimate),2),"(",round(exp(statout$Estimate-1.96*statout$Std..Error),2),",",round(exp(statout$Estimate+1.96*statout$Std..Error),2),")15")
+statout$Pr...t..<-round(statout$Pr...t..,digits = 4)
+statout$SmkStatus<-'Former Smoker'
+statoutFinal2<-rbind(statoutFinal2,statout)
