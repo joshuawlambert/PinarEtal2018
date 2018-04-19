@@ -1,1 +1,116 @@
-#
+#Code for producing doing Random Forest and CART models
+require(rpart)
+require(partykit)
+require(party)
+require(MASS)
+
+
+#new file
+source("~/ctree_mod.R")
+zlogabc<- read.csv("data")
+
+zlogabc$periostat<- factor(zlogabc$periostat,labels=c("Healthy","Perio"))
+zlogabc$RIDRETH1<-factor(zlogabc$RIDRETH1,labels=c("Mex Am","O Hisp","White","Black","Other"))
+zlogabc$RIAGENDR<-factor(zlogabc$RIAGENDR,labels=c("Male","Female"))
+zlogabc$smoking<-factor(zlogabc$smoking,labels=c("Non-Smoker","Current Smoker","Former Smoker"))
+
+
+#GETTING THE 156 Environmental Variables and Demographics
+myvar_all <- c("zlogLBXACR","zlogLBXGLY","zlogLBXCOT","zlogLBXBCD","zlogLBXBPB",
+               "zlogLBXIHG","zlogLBXTHG","zlogLBXALC","zlogLBXVIE","zlogLBXCRY","zlogLBXCBC",
+               "zlogLBXLUZ","zlogLBXRBF","zlogLBXFOL","zlogLBXGTC","zlogLBXIRN","zlogLBXMMA",
+               "zlogLBXVIA","zlogLBXRPL","zlogLBXRST","zlogLBXSEL","zlogLBXBEC","zlogLBXLYC",
+               "zlogLBXB12","zlogLBDVID","zlogURXUSB","zlogURXUBA","zlogURDUCD", "zlogURXUCS",
+               "zlogURXUCO","zlogURXUPB","zlogURXUHG","zlogURXUMO","zlogURXUTL","zlogURXUTU",
+               "zlogURXUUR","zlogURXUDMA","zlogURXUMMA","zlogURXP01","zlogURXP06","zlogURXP10",
+               "zlogURXP04","zlogURXP02","zlogURXP07","zlogURXP03","zlogURXP05","zlogURXP19",               
+               "zlogURXP17","zlogLBXBHC","zlogLBXDIE","zlogLBXHPE","zlogLBXHCB","zlogLBXMIR",
+               "zlogLBXODT","zlogLBXOXY","zlogLBXPDE","zlogLBXPDT","zlogLBXTNA","zlogURXDPY",
+               "zlogURXTCC","zlogURXMHP","zlogURXMHH","zlogURXMOH","zlogURXMC1","zlogURXMZP",
+               "zlogURXMCP","zlogURXMEP","zlogURXMIB","zlogURXMNP","zlogURXMBP","zlogURXMNM",
+               "zlogURXMOP","zlogURXDAZ","zlogURXETD","zlogURXETL","zlogURXEQU","zlogURXGNS",
+               "zlogURXDMA","zlogURXOP6","zlogURXOP2","zlogURXOP4","zlogURXOP5","zlogURXOP1",
+               "zlogURXOP3","zlogLBXD07","zlogLBXD05","zlogLBXD02","zlogLBXD03","zlogLBXD04",
+               "zlogLBXD01","zlogLBXTCD","zlogLBXF08","zlogLBXF04","zlogLBXF05","zlogLBXD01",
+               "zlogLBXF07","zlogLBXF03","zlogURXUIO","zlogLBX101","zlogLBX105","zlogLBX118",
+               "zlogLBX138","zlogLBX146","zlogLBX153","zlogLBX156","zlogLBX157","zlogLBX167",
+               "zlogLBX170","zlogLBX172","zlogLBX177","zlogLBX178","zlogLBX180","zlogLBX183",
+               "zlogLBX187","zlogLBX194","zlogLBX196","zlogLBD199","zlogLBX206","zlogLBX028",
+               "zlogLBX052","zlogLBX066","zlogLBX074","zlogLBX099","zlogLBXHXC","zlogLBXPCB",
+               "zlogURXMET","zlogURX1TB","zlogURX3TB","zlogURXDCB","zlogURX14D","zlogURXOPP",
+               "zlogURXPCP","zlogURX4TO","zlogURXBP3","zlogURXBPH","zlogLBXV3A","zlogLBXVDB",
+               "zlogLBXVBZ","zlogLBXVBM","zlogLBXVBF","zlogLBXVCT","zlogLBXVCF","zlogLBXVCM",
+               "zlogLBXVEB","zlogLBXVXY","zlogLBXVME","zlogLBXVOX","zlogLBXVST","zlogLBXV4C",
+               "zlogLBXVTO","zlogLBXVTC","zlogLBXWBM","zlogLBXWBF","zlogLBXWCF","zlogLBXWCM",
+               "zlogLBXWME","RIAGENDR","RIDRETH1","INDFMPIR","RIDAGEYR","periostat","totalteeth","smoking")
+
+all <- zlogabc[,myvar_all]
+
+nsmk<-subset(all,all$smoking=='Non-Smoker' & all$RIDAGEYR>=18 & all$totalteeth>=16)
+smk<-subset(all,all$smoking=='Current Smoker' & all$RIDAGEYR>=18 & all$totalteeth>=16)
+fsmk<-subset(all,all$smoking=='Former Smoker' & all$RIDAGEYR>=18 & all$totalteeth>=16)
+
+
+#it looks like grace only used variables with influence of 0.1 or greater; according to here dissertation, variables that had 
+#a p-value of <0.01 were used in the fitting of the CART.
+
+########################
+####non-smokers
+########################
+tmp <- subset(nsmk,periostat!='NA')
+tmp <- subset(tmp,tmp$RIDAGEYR>=18 & tmp$totalteeth>=16)
+
+data.controls<-cforest_unbiased(ntree=500,mtry=13) #mtry=13 for nsmk
+#set.seed(47)
+cforest.miss<-cforest(periostat~.,controls=data.controls,data=tmp) #data with missing values
+vi.new<-varimp(cforest.miss,pre1.0_0=F) #new VI
+sort.vi.new<-sort(vi.new)
+# 
+# 
+# tmp <- subset(nsmk,nsmk$RIDAGEYR>=18 & nsmk$totalteeth>=16)
+form<-paste("periostat~",paste(tail(colnames(t(sort.vi.new)),10),collapse = "+"),collapse = "")
+fit<-ctree(as.formula(form),
+           data=tmp,controls = ctree_control(minbucket=100,testtype="Bonferroni")
+           #,weights=round(tmp$new6yr/10000)
+)
+plot(fit,cex.lab=5,main="Non-Smokers - Age>=18 and teeth>=16, Followup Results From RF _new_zlogabc")
+
+plot(fit,inner_panel=innerWeights,terminal_panel=node_barplot2,tp_args=list(ylines=c(2,4)),
+     cex.lab=5,main="Non-Smokers - Age>=18 and teeth>=16")
+###################
+#####smokers
+#################
+tmp <- subset(smk,periostat!='NA')
+tmp <- subset(tmp,tmp$RIDAGEYR>=18 & tmp$totalteeth>=16)
+
+data.controls<-cforest_unbiased(ntree=500,mtry=13) #mtry=13 for nsmk
+set.seed(47)
+cforest.miss<-cforest(periostat~.,controls=data.controls,data=tmp) #data with missing values
+vi.new<-varimp(cforest.miss,pre1.0_0=F) #new VI
+sort.vi.new<-sort(vi.new)
+
+tmp<-subset(smk,smk$RIDAGEYR>=18 & smk$totalteeth>=16) 
+form<-paste("periostat~",paste(tail(colnames(t(sort.vi.new)),10),collapse = "+"),collapse = "")
+fit.smk<-ctree(as.formula(form),
+               data=tmp,controls = ctree_control(minbucket=100,testtype="Bonferroni"))
+#minbucket=0.1*nrow(tmp)=the terminal node should have at least 10% of the sample
+plot(fit.smk,cex.lab=5,main="Smokers - Age>=18 and teeth>=16, Followup Results From RF - Weighted")
+plot(fit.smk,inner_panel=innerWeights,terminal_panel=node_barplot2,tp_args=list(ylines=c(2,4)),
+     cex.lab=5,main="Smokers - Age>=18 and teeth>=16")
+########################
+#####former smokers
+########################
+tmp <- subset(fsmk,periostat!='NA')
+tmp <- subset(tmp,tmp$RIDAGEYR>=18 & tmp$totalteeth>=16)
+
+data.controls<-cforest_unbiased(ntree=500,mtry=13) #mtry=13 for nsmk
+set.seed(47)
+cforest.miss<-cforest(periostat~.,controls=data.controls,data=tmp) #data with missing values
+vi.new<-varimp(cforest.miss,pre1.0_0=F) #new VI
+sort.vi.new<-sort(vi.new)
+
+# 
+# tmp<-subset(fsmk,fsmk$RIDAGEYR>=18 & fsmk$totalteeth>=16)
+form<-paste("periostat~",paste(tail(colnames(t(sort.vi.new)),10),collapse = "+"),collapse = "")
+fit.fsmk<-ctree(as.formula(form),data=tmp,controls = ctree_control(minbucket=100,testtype="Bonferroni"))
+plot(fit.fsmk,cex.lab=5,main="Former-smokers - Age>=18 and teeth>=16, Followup Results From RF - Weighted")
