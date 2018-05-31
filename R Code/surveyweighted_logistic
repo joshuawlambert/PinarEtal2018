@@ -11,7 +11,7 @@ all$RIAGENDR<-factor(all$RIAGENDR,labels=c("Male","Female"))
 all$smoking<-factor(all$smoking,labels=c("Non-Smoker","Current Smoker","Former Smoker"))
 
 #non smokers:
-subsmk<-subset(all,all$smoking=='Non-Smoker' & all$RIDAGEYR>18 &  all$totalteeth>=16)
+subsmk<-subset(all,all$smoking=='Non-Smoker' & all$RIDAGEYR>=18 &  all$totalteeth>=16)
 
 statout<-array(NA,dim=c(length(coln),4))
 dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
@@ -41,7 +41,7 @@ statoutFinal2<-statout
 
 
 #Current Smoker
-subsmk<-subset(all,all$smoking=='Current Smoker' & all$RIDAGEYR>18 &  all$totalteeth>=16)
+subsmk<-subset(all,all$smoking=='Current Smoker' & all$RIDAGEYR>=18 &  all$totalteeth>=16)
 
 statout<-array(NA,dim=c(length(coln),4))
 dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
@@ -70,7 +70,7 @@ statout$SmkStatus<-"Current-Smoker"
 statoutFinal2<-rbind(statoutFinal2,statout)
 
 #'Former Smoker' 
-subsmk<-subset(all,all$smoking=='Former Smoker' &  all$RIDAGEYR>18 &  all$totalteeth>=16)
+subsmk<-subset(all,all$smoking=='Former Smoker' &  all$RIDAGEYR>=18 &  all$totalteeth>=16)
 
 statout<-array(NA,dim=c(length(coln),4))
 dsn <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weight=~new6yr, data=subsmk, nest=TRUE)
